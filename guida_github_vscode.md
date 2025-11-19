@@ -22,7 +22,7 @@ $ git config --global user.email johndoe@example.com
 1. Apri **VS Code**.  
 2. Nella barra in alto o tramite **Ctrl + Shift + P**, scrivere **Git: clone** 
 3. Clicca su **Clone from Github**.  
-4. Incolla l’URL del repository GitHub (es. `https://github.com/nomeutente/nome-progetto.git`).  
+4. Seleziona il repository GitHub o incolla l’URL del repo (es. `https://github.com/nomeutente/nome-progetto.git`).  
 5. Scegli una cartella locale dove salvare il progetto.  
 6. Quando richiesto, clicca su **Apri il progetto**.
 
@@ -30,7 +30,7 @@ $ git config --global user.email johndoe@example.com
 
 1. In basso a sinistra, clicca sul nome del branch (di solito `main`).  
 2. Seleziona **Create new branch...**  
-3. Scrivi il nome del tuo branch, ad esempio `sviluppo-mario`.  
+3. Scrivi il nome del tuo branch, ad esempio `feature/login`.  
 4. Premi **Invio**: ora stai lavorando su quel branch.
 
 ## 4. Aggiungere e salvare i file
@@ -80,7 +80,7 @@ Può farlo:
 
 ## Suggerimenti utili
 
-- Usa **nomi chiari** per i branch (`sviluppo-mario`, `feature-login`, ecc.).  
+- Usa **nomi chiari** per i branch (`sviluppo/mario`, `feature/login`, ecc.).  
 - Fai **commit frequenti** con messaggi descrittivi.  
 - Se appaiono conflitti, VS Code li evidenzia nel codice: scegli quali versioni mantenere e salva.  
 - Dopo il merge, puoi eliminare i branch che non servono più.
