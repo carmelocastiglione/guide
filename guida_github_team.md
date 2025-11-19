@@ -1,34 +1,60 @@
 # Guida alla Configurazione Sicura del Repository GitHub per un Team di Sviluppo Web
 
-## Obiettivo
-Impostare correttamente **utenti, ruoli e regole (ruleset)** per lavorare in modo collaborativo su GitHub **senza rischiare errori o danni** al codice in produzione.
+## 1. Crea l’organizzazione o il repository
 
-## 1. Creazione del repository
+Hai due possibilità:
 
-1. Accedi a GitHub e crea un nuovo repository:
-   - Nome chiaro e descrittivo (es. `progetto-web`).
-   - Privato se il codice non deve essere pubblico.
-   - Inizializza con un `README.md` e, se serve, un `.gitignore` per il tuo stack (Node, Python, PHP, ecc.).
-   - Scegli una licenza se necessario (MIT, GPL, ecc.).
+### A) Usare un’organizzazione GitHub (consigliato per team)
 
-2. Clona il repository localmente:
+* Vai su **GitHub → + → New Organization**
+* Crea un team dedicato
+* Aggiungi i collaboratori
+* Crei dentro l'organizzazione il repository del progetto (es. `webapp-2025`)
+  - Nome chiaro e descrittivo.
+  - Privato se il codice non deve essere pubblico.
+  - Inizializza con un `README.md` e, se serve, un `.gitignore` per il tuo stack (Node, Python, PHP, ecc.).
+  - Scegli una licenza se necessario (MIT, GPL, ecc.).
+
+### B) Usare un singolo repository
+
+* Clicca **New Repository**
+* Impostalo come pubblico o privato
+* Aggiungi i collaboratori nel tab **Settings → Collaborators**
+   
+## 3. Clona il repository localmente:
 
 ```bash
 git clone https://github.com/<utente>/<repo>.git
 cd <repo>
 ````
 
-## 2. Struttura consigliata dei branch
+### File importanti che dovrebbero essere presenti:
+
+* **README.md** → spiega obiettivi, struttura, come installare ed eseguire
+* **CONTRIBUTING.md** → regole per contribuire (branch naming, standard di codice, ecc.)
+* **ISSUE_TEMPLATE.md** → modello per segnalare problemi o richiedere feature
+* **PULL_REQUEST_TEMPLATE.md** → modello per le PR
+
+## 4. Struttura consigliata dei branch
 
 | Branch | Scopo | Protezione |
 |--------|--------|-------------|
 | `main` | Versione stabile e pronta per la produzione | Molto protetto |
 | `develop` | Integrazione delle funzionalità testate | Protetto, ma più flessibile |
 | `feature/*` | Branch temporanei per nuove funzionalità | Pochi vincoli |
+| `fix/*` | Per le correzioni| Pochi vincoli |
 
-> Tutti i merge verso `main` devono avvenire tramite **pull request** approvate e testate.
+Esempi:
 
-## 3. Impostazione dei Ruleset
+```
+feature/login-page
+feature/api-users
+fix/header-layout
+```
+
+> Tutti i merge verso `main` e `develop` devono avvenire tramite **pull request** approvate e testate.
+
+## 5. Impostazione dei Ruleset
 
 Regole di base:
 
@@ -44,7 +70,7 @@ Regole di base:
   * Richiedi PR per le modifiche.
   * Minimo 1 approvatore.
 
-* **Branch `feature/*`**:
+* **Branch `feature/*` e `fix/*`**:
 
   * Consentito sviluppo rapido e rebase locali.
   * Pochi vincoli, può essere cancellato dopo merge.
@@ -74,9 +100,7 @@ Regole di base:
 | **Approvals** | ✅ 1 approvatore | Controllo base sul codice |
 | **Force push / Deletion** | ❌ Vietato | Mantiene la storia pulita |
 
----
-
-### Ruleset per `feature/*`
+### Ruleset per `feature/*` e `fix/*`
 
 | Sezione | Impostazione | Descrizione |
 |----------|--------------|-------------|
@@ -85,14 +109,93 @@ Regole di base:
 | **Force push** | ✅ Sì | Utile per rebase locali |
 | **Auto-cleanup** | (facoltativo) | Rimozione automatica branch inattivi |
 
-## 4. Workflow consigliato
+## 6. Gestione del lavoro: GitHub Issues
 
-1. **Creazione di feature branch**: ogni funzionalità viene sviluppata su un branch separato (`feature/login`, `feature/carrello`).
-2. **Pull request su `develop`**: una volta pronta, la feature viene unita in `develop`.
-3. **Test e revisione**: il team rivede il codice 
-4. **Merge su `main`**: dopo approvazione, il branch `develop` viene unito in `main` per la produzione.
+### Ogni incarico = una issue
 
-## 5. Gestione dei Ruoli Utente
+Per ogni funzionalità o problema crea una Issue.
+
+Esempio di Issue:
+
+```
+Titolo: Implementare pagina di login
+
+Descrizione:
+- Form email + password
+- Validazione lato frontend
+- Collegamento API
+- Test responsività
+
+Assegnato a: @mario
+Etichetta: feature, frontend
+Deadline: 25 novembre
+```
+
+### Etichette utili:
+
+* feature
+* fix
+* bug
+* frontend
+* backend
+* high priority
+* in progress
+* to review
+* documentation
+
+## 7. Monitora lo stato con GitHub Projects (Kanban)
+
+GitHub Projects ti permette di creare una **lavagna tipo Trello**, direttamente collegata con Issues e PR.
+
+Tipica board Kanban:
+
+### To Do
+
+* Tutte le Issues pronte da assegnare
+
+### In Progress
+
+* Incarichi su cui il team sta lavorando
+
+### In Review
+
+* PR che aspettano revisione
+
+### Done
+
+* Completati
+
+Ogni membro del team può spostare la sua issue quando cambia fase.
+
+## 8. Workflow consigliato per il team
+
+### 1. Il project manager crea:
+
+* Issues per ogni incarico (con eventuali label e milestone)
+* Board Kanban
+* Assegna i compiti al team
+
+### 2. Ogni sviluppatore:
+
+* Si prende una Issue
+* Crea il branch `feature/*` o `fix/*`
+* Sviluppa
+* Fa push
+* Apre una Pull Request verso `develop`
+
+### 3. Tu o un reviewer:
+
+* Controlli la PR
+* Commenti eventuali modifiche
+* Approvazione
+* Merge su `develop`
+
+### 4. Alla fine del ciclo:
+
+* Merge da `develop` a `main`
+* Deploy
+
+## 9. Gestione dei Ruoli Utente
 
 ### Ruoli base nel repository
 
@@ -104,10 +207,8 @@ Regole di base:
 | **Maintain** | Gestire PR, issue e impostazioni minori | Team leader o dev senior |
 | **Admin** | Tutti i permessi (anche eliminare repo) | Owner del progetto |
 
-👉 *Percorso:*  
+*Percorso:*  
 `Repository → Settings → Collaborators → Add people → Seleziona ruolo`
-
----
 
 ### Ruoli a livello di Organizzazione (consigliato per team)
 
@@ -117,9 +218,7 @@ Regole di base:
 | **Member** | Accesso limitato, configurabile per repo |
 | **Billing Manager** | Gestisce solo la fatturazione (non necessario) |
 
----
-
-## 6. Creazione di Team (solo per Organizzazioni)
+## 10. Creazione di Team (solo per Organizzazioni)
 
 1. Vai su `Organization → Teams → New team`
 2. Crea i gruppi di lavoro:
@@ -137,7 +236,7 @@ WebProject
 - Aggiunta/rimozione membri immediata
 - Controllo centralizzato su più progetti
 
-## 7. File `CODEOWNERS`
+## 11. File `CODEOWNERS`
 
 Crea il file `.github/CODEOWNERS` per definire chi deve approvare le modifiche a specifiche parti del codice:
 
@@ -152,40 +251,46 @@ Crea il file `.github/CODEOWNERS` per definire chi deve approvare le modifiche a
 
 Se hai attivato la regola *Require review from code owners*, nessun merge sarà possibile senza la loro approvazione.
 
-## 8. Best Practice di Sicurezza
+## 12. Best Practice di Sicurezza
 
-✅ Attiva **autenticazione a due fattori (2FA)** per tutti i membri.
-✅ Blocca **push diretti** su `main` e `develop`.
-✅ Usa **GitHub Secrets** per le variabili d’ambiente.
-✅ Attiva **secret scanning** e **dependabot alerts**.
+✅ Attiva **autenticazione a due fattori (2FA)** per tutti i membri.\
+✅ Blocca **push diretti** su `main` e `develop`.\
+✅ Usa **GitHub Secrets** per le variabili d’ambiente.\
+✅ Attiva **secret scanning** e **dependabot alerts**.\
 ✅ Nomina **almeno due Admin/Owner** per evitare blocchi.
 
-## 9. Ruoli consigliati per un piccolo team (esempio)
+## 13. Ruoli consigliati per un piccolo team (esempio)
 
 | Membro             | Ruolo    | Branch accesso | Responsabilità               |
 | ------------------ | -------- | -------------- | ---------------------------- |
 | Project Owner      | Admin    | Tutti          | Gestione generale e release  |
 | Team Leader        | Maintain | develop        | Revisione e merge            |
-| Dev Frontend       | Write    | feature/*      | Sviluppo interfacce          |
-| Dev Backend        | Write    | feature/*      | Sviluppo logica e API        |
+| Dev Frontend       | Write    | feature/* e fix/*      | Sviluppo interfacce          |
+| Dev Backend        | Write    | feature/* e fix/*     | Sviluppo logica e API        |
 | QA / Tester        | Triage   | develop        | Verifica e issue tracking    |
 | Cliente / Revisore | Read     | main           | Consultazione codice stabile |
 
-## 10. Riepilogo
+## 14. Riepilogo
 
 | Area         | Regole chiave                                                                  |
 | ------------ | ------------------------------------------------------------------------------ |
 | **main**     | Merge solo via PR approvata, test obbligatori, no push diretti                 |
 | **develop**  | PR con una review, no force push                                               |
-| **feature/** | Lavoro libero, poi merge su `develop`                                          |
+| **feature/** e **fix/** | Lavoro libero, poi merge su `develop`                                          |
 | **Ruoli**    | Admin (1–2), Maintain (1–2), Write (sviluppatori), Triage (QA), Read (clienti) |
 
 
 
-## 11. Best Practice
+## 15. Best Practice
 
 * Usa **pull request sempre**.
 * Blocca **push diretti su branch protetti**.
 * Abilita **2FA per tutti i membri**.
 * Mantieni `develop` stabile, non solo un branch di test.
 * Mantieni una documentazione chiara (`README`, `CONTRIBUTING.md`).
+
+## 16. Risultato finale
+* Ogni compito è tracciato
+* Ogni stato (da fare → in corso → review → fatto) è visibile
+* Ogni modifica è controllata
+* Tutto il team lavora in modo ordinato e professionale
