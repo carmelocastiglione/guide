@@ -214,6 +214,100 @@ scp backup_completo.sql.gz user@remote_server:/remote/backup/path/
 rsync -avz --delete backup_completo.sql.gz user@remote_server:/remote/backup/path/
 ```
 
+## 6.5 Connessione a Server SSH e Download con SCP
+
+### Connessione SSH al Server Remoto
+
+Per accedere a un server remoto tramite SSH:
+
+```bash
+# Connessione base
+ssh user@remote_server
+
+# Con porta personalizzata
+ssh -p 2222 user@remote_server
+
+# Con chiave privata specifica
+ssh -i /path/to/private_key user@remote_server
+```
+
+### Download di Backup da Server Remoto con SCP
+
+Per scaricare file di backup dal server remoto al tuo computer locale:
+
+```bash
+# Download singolo file
+scp user@remote_server:/remote/backup/backup_completo.sql.gz ./
+
+# Download con porta personalizzata
+scp -P 2222 user@remote_server:/remote/backup/backup_completo.sql.gz ./
+
+# Download con chiave privata specifica
+scp -i /path/to/private_key user@remote_server:/remote/backup/backup_completo.sql.gz ./
+
+# Download ricorsivo di intera cartella
+scp -r user@remote_server:/remote/backup/path/ ./local_backup_folder/
+
+# Download preservando permessi e timestamp
+scp -p user@remote_server:/remote/backup/backup_completo.sql.gz ./
+```
+
+### Upload di Backup a Server Remoto con SCP
+
+Per caricare backup locali su server remoto:
+
+```bash
+# Upload singolo file
+scp backup_completo.sql.gz user@remote_server:/remote/backup/path/
+
+# Upload con porta personalizzata
+scp -P 2222 backup_completo.sql.gz user@remote_server:/remote/backup/path/
+
+# Upload con barra di progresso
+scp -v backup_completo.sql.gz user@remote_server:/remote/backup/path/
+```
+
+### Configurazione SSH per Facilità d'Accesso
+
+Crea un file `~/.ssh/config` per semplificare le connessioni:
+
+```ini
+Host backup-server
+    HostName remote_server.com
+    User backup_user
+    Port 2222
+    IdentityFile ~/.ssh/id_rsa
+    IdentitiesOnly yes
+    ServerAliveInterval 60
+```
+
+Quindi puoi usare comandi semplificati:
+
+```bash
+# Connessione
+ssh backup-server
+
+# Download
+scp backup-server:/remote/backup/backup_completo.sql.gz ./
+
+# Upload
+scp backup_completo.sql.gz backup-server:/remote/backup/path/
+```
+
+### Verifica Integrità Dopo il Trasferimento
+
+Dopo il download, verifica che il file non sia stato corrotto:
+
+```bash
+# Se disponibile, confronta il checksum
+scp backup-server:/remote/backup/backup_completo.sql.gz.sha256 ./
+sha256sum -c backup_completo.sql.gz.sha256
+
+# Verifica dimensione file
+ssh backup-server "du -h /remote/backup/backup_completo.sql.gz"
+du -h backup_completo.sql.gz
+```
+
 ## 7. Ripristino da Backup
 
 ### Ripristino Completo
