@@ -1,12 +1,12 @@
-# Guida Installazione Raspberry Pi OS su Raspberry Pi 2 Model B
+# Guida Installazione Raspberry Pi OS su Raspberry Pi
 
 ## Introduzione
 
-Questa guida ti accompagna nel processo di installazione di Raspberry Pi OS su un Raspberry Pi 2 Model B configurando un **server headless** (senza schermo) utilizzando Raspberry Pi Imager.
+Questa guida ti accompagna nel processo di installazione di Raspberry Pi OS su un Raspberry Pi configurando un **server headless** (senza schermo) utilizzando Raspberry Pi Imager.
 
 ## Hardware Necessario
 
-Per configurare un server headless su Raspberry Pi 2 Model B, avrai bisogno di:
+Per configurare un server headless su Raspberry Pi, avrai bisogno di:
 
 ### Componenti Essenziali
 - **Raspberry Pi 2 Model B** - Il microcomputer principale
@@ -43,9 +43,11 @@ Per configurare un server headless su Raspberry Pi 2 Model B, avrai bisogno di:
 ### Passo 1: Seleziona il Sistema Operativo
 
 1. Apri **Raspberry Pi Imager**
-2. Scegli **"Raspberry Pi 2 Model B"** come dispositivo
+2. Scegli il dispositivo sul quale installare il SO, ad esempio **"Raspberry Pi 2 Model B"** o **"Raspberry Pi 3"**
 3. Seleziona **"Raspberry Pi OS (other)"**
-4. Scegli **"Raspberry Pi OS Lite (32-bit)"** (versione minimale, senza interfaccia grafica - perfetta per server headless)
+4. Scegli il Sistema Operativo a seconda del dispositivo, ad esempio **"Raspberry Pi OS Lite (32-bit)"** o **"Raspberry Pi OS Lite (64-bit)"** (versione minimale, senza interfaccia grafica - perfetta per server headless). Ricorda che:
+    - Raspberry Pi 2 ha una CPU ARM a `32 bit`
+    - Raspberry Pi 3 ha una CPU ARM a `64 bit`
 
 ### Passo 2: Seleziona la Scheda di Memoria
 
@@ -100,7 +102,15 @@ Per configurare un server headless su Raspberry Pi 2 Model B, avrai bisogno di:
 
 ## Trovare il Raspberry Pi sulla Rete
 
-### Metodo 1: Tramite Router/Interfaccia DHCP
+### Metodo 1: Ricerca del Hostname (Windows PowerShell)
+
+```powershell
+# Se conosci il nome host, puoi cercare il dispositivo
+ping raspberrypi -4
+# Nota l'indirizzo IP dalla risposta
+```
+
+### Metodo 2: Tramite Router/Interfaccia DHCP
 
 1. Accedi alla pagina amministrativa del tuo router (solitamente http://192.168.1.1 o http://192.168.0.1)
 2. Accedi con le credenziali del router
@@ -108,7 +118,7 @@ Per configurare un server headless su Raspberry Pi 2 Model B, avrai bisogno di:
 4. Cerca il dispositivo con il nome host che hai impostato (es. `raspberry-server`)
 5. Annota l'indirizzo IP assegnato (es. `192.168.1.100`)
 
-### Metodo 2: Tramite Comando (Windows PowerShell)
+### Metodo 3: Tramite Comando (Windows PowerShell)
 
 ```powershell
 # Scansiona i dispositivi della rete con ping
@@ -120,18 +130,10 @@ for ($i=1; $i -le 254; $i++) {
 }
 ```
 
-### Metodo 3: Tramite Nmap (se installato)
+### Metodo 4: Tramite Nmap (se installato)
 
 ```bash
 nmap -sn 192.168.1.0/24
-```
-
-### Metodo 4: Ricerca del Hostname (Windows PowerShell)
-
-```powershell
-# Se conosci il nome host, puoi cercare il dispositivo
-ping raspberry-server -4
-# Nota l'indirizzo IP dalla risposta
 ```
 
 ## Connessione via SSH
@@ -149,7 +151,7 @@ ping raspberry-server -4
 ssh pi@192.168.1.100
 
 # Oppure con il hostname (se risolto):
-ssh pi@raspberry-server
+ssh pi@raspberrypi
 
 # Quando richiesto, digita la password e premi Enter
 ```
@@ -175,7 +177,7 @@ ssh pi@192.168.1.100
 Una volta connesso tramite SSH, dovresti vedere un prompt simile a:
 
 ```
-pi@raspberry-server:~ $
+pi@raspberrypi:~ $
 ```
 
 Digita i seguenti comandi per verificare la corretta installazione:
@@ -243,7 +245,7 @@ sudo ufw enable
 
 ## Conclusione
 
-Hai completato l'installazione di Raspberry Pi OS su Raspberry Pi 2 Model B come server headless! Ora puoi:
+Hai completato l'installazione di Raspberry Pi OS su Raspberry Pi come server headless! Ora puoi:
 
 - Installare servizi e applicazioni via SSH
 - Monitorare il sistema remotamente

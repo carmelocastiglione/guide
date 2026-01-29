@@ -2,7 +2,10 @@
 
 ## Introduzione
 
-Questa guida spiega come configurare un Raspberry Pi 2 Model B per ricevere dati da un Arduino tramite il protocollo MQTT e visualizzarli usando **InfluxDB**, **Telegraf** e **Grafana**.
+Questa guida spiega come configurare:
+- un **Raspberry Pi 2 Model B** (InfluxDB 1.8.x), oppure
+- un **Raspberry Pi 3 o superiore** (InfluxDB 2.x)
+per ricevere dati da Arduino tramite MQTT e visualizzarli con **InfluxDB**, **Telegraf** e **Grafana**. InfluxDB, nella versione 2.x, può essere installato solamente su CPU a 64 bit, quindi per installarlo su Raspberry Pi 2 dobbiamo installare la versione 1.8.x che è compatibile anche con CPU a 32 bit.
 
 ### Architettura del Sistema
 
@@ -20,7 +23,8 @@ Arduino
 
 ## Prerequisiti
 
-- Raspberry Pi 2 Model B con Raspberry Pi OS Lite installato (vedi: `guida_installazione_so_raspberry.md`)
+- **Raspberry Pi 2 Model B** con Raspberry Pi OS Lite (InfluxDB 1.8.x, solo 32 bit)
+- **Raspberry Pi 3 o superiore** con Raspberry Pi OS Lite (InfluxDB 2.x, consigliato 64 bit)
 - Connessione SSH attiva al Raspberry Pi
 - Arduino con sketch MQTT configurato
 - Arduino IDE o altra soluzione per programmare Arduino
@@ -97,15 +101,15 @@ mosquitto_pub -h localhost -t "test/topic" -m "Hello MQTT!"
 
 Se il messaggio appare nel Terminal 1, MQTT funziona correttamente.
 
-## Parte 2: Installazione e Configurazione di InfluxDB 1.8.x
+## Parte 2: Installazione e Configurazione di InfluxDB
 
 ### Cos'è InfluxDB?
 
 InfluxDB è un database specializzato per dati time-series (serie temporali), perfetto per memorizzare misurazioni di sensori nel tempo.
 
-**Nota**: Utilizziamo InfluxDB **1.8.x** invece di 2.x perché il Raspberry Pi 2 è un dispositivo a 32-bit con risorse limitate. InfluxDB 1.8 ha un footprint di memoria molto inferiore ed è più stabile su ARM32.
+> **Nota**: Utilizziamo **InfluxDB 1.8.x** su Raspberry Pi 2 perché è un dispositivo a 32-bit, mentre **InfluxDB 2.x** su Raspberry Pi 3. Seguire la parte appropriata della guida. 
 
-### Installazione di InfluxDB 1.8.x
+#### Installazione di InfluxDB 1.8.x
 
 Su Raspberry Pi 2, il repository ufficiale InfluxDB ha problemi di verifica GPG. Usa questo metodo alternativo:
 
@@ -135,7 +139,7 @@ sudo systemctl status influxdb
 
 **Nota sulla sicurezza**: L'opzione `[trusted=yes]` disabilita la verifica GPG per questo repository. Su una Raspberry Pi in una rete privata questo è accettabile, ma su ambienti di produzione esposti a internet, valuta alternative come compilare da source o usare Prometheus.
 
-### Configurazione Iniziale di InfluxDB 1.8.x
+#### Configurazione Iniziale di InfluxDB 1.8.x
 
 ```bash
 # Accedi alla shell InfluxDB CLI
@@ -155,7 +159,7 @@ SHOW DATABASES
 exit
 ```
 
-### Creare un Utente (Opzionale ma Consigliato)
+#### Creare un Utente (Opzionale ma Consigliato)
 
 Per aggiungere autenticazione:
 
@@ -176,13 +180,45 @@ GRANT ALL ON arduino_db TO telegraf
 exit
 ```
 
+### InfluxDB 2.x (Raspberry Pi 3 o superiore)
+
+```bash
+# Aggiungi la chiave GPG
+curl -s https://repos.influxdata.com/influxdb.key | gpg --dearmor | sudo tee /usr/share/keyrings/influxdb-archive-keyring.gpg > /dev/null
+
+# Aggiungi il repository (usa bullseye per Raspberry Pi OS 11+)
+echo "deb [signed-by=/usr/share/keyrings/influxdb-archive-keyring.gpg] https://repos.influxdata.com/debian bullseye stable" | sudo tee /etc/apt/sources.list.d/influxdb.list
+
+sudo apt update
+sudo apt install influxdb2 -y
+sudo systemctl enable influxdb
+sudo systemctl start influxdb
+sudo systemctl status influxdb
+```
+
+#### Configurazione iniziale
+
+1. Apri il browser: `http://<IP_RASPBERRY>:8086`
+2. Segui la procedura guidata per creare:
+   - Un utente admin
+   - Un'organizzazione (es: `vigano`)
+   - Un bucket (es: `arduino_data`)
+   - Un token di accesso (annotalo, servirà per Telegraf)
+
+#### Creazione bucket e token via CLI (opzionale)
+
+```bash
+influx setup
+# oppure
+influx bucket create --name arduino_data --org vigano --retention 30d
+influx auth create --org my-org --all-access
+```
+
 ## Parte 3: Installazione e Configurazione di Telegraf
 
-### Cos'è Telegraf?
+### Telegraf per InfluxDB 1.8.x (Pi 2)
 
-Telegraf è un agent per raccogliere, elaborare e trasmettere metriche. In questo caso, leggerà i dati MQTT da Mosquitto e li inoltrerà a InfluxDB.
-
-### Installazione di Telegraf
+#### Installazione di Telegraf
 
 ```bash
 # Aggiungi il repository di InfluxData (disabilitando verifica GPG per ARM32)
@@ -204,7 +240,7 @@ sudo systemctl enable telegraf
 sudo cat /etc/telegraf/telegraf.conf | less
 ```
 
-### Configurazione Telegraf per MQTT e InfluxDB
+### Configurazione Telegraf per MQTT e InfluxDB 1.8.x
 
 Crea un nuovo file di configurazione specifico per il tuo progetto:
 
@@ -257,6 +293,40 @@ timeout = "5s"
 - Se hai abilitato l'autenticazione, inserisci username e password
 
 Salva con **CTRL+X**, poi **Y**, poi **Enter**.
+
+### Telegraf per InfluxDB 2.x (Pi 3+)
+
+```bash
+sudo apt install telegraf -y
+```
+
+#### Configurazione Telegraf per MQTT e InfluxDB 2.x
+
+```bash
+sudo nano /etc/telegraf/telegraf.d/mqtt-influxdb2.conf
+```
+
+Esempio di configurazione:
+
+```toml
+[[inputs.mqtt_consumer]]
+  servers = ["tcp://localhost:1883"]
+  topics = ["arduino/temperature", "arduino/humidity", "arduino/pressure"]
+  qos = 0
+  persistent_session = false
+  client_id = "telegraf"
+  data_format = "value"
+  data_type = "float"
+
+[[outputs.influxdb_v2]]
+  urls = ["http://localhost:8086"]
+  token = "INSERISCI_IL_TUO_TOKEN"
+  organization = "vigano"
+  bucket = "arduino_data"
+  timeout = "5s"
+```
+
+Sostituisci `token`, `organization` e `bucket` con i valori creati nella configurazione di InfluxDB 2.x.
 
 ### Avvio di Telegraf
 
@@ -342,23 +412,19 @@ Dovresti vedere un messaggio di successo.
    - Seleziona `InfluxDB Arduino` come Data Source
    - Costruisci una query per visualizzare i dati (es. temperature da Arduino)
 
-**Esempio di Query InfluxQL (linguaggio InfluxDB 1.8):**
+**Esempio di Query InfluxQL:**
 
-Nell'interfaccia Grafana, usa il **Query Inspector** e scrivi:
-
+- **InfluxDB 1.8.x (Flux):**
 ```sql
 SELECT mean("value") FROM "mqtt_consumer" WHERE topic='arduino/temperature' AND time > now() - 1h GROUP BY time(1m)
 ```
-
-Oppure crea una query visualmente:
-1. Nel pannello Query, scegli **InfluxDB Arduino** come source
-2. Seleziona **arduino_db** come database
-3. Scegli la measurement **mqtt_consumer**
-4. Filtra per il topic desiderato (es. `arduino/temperature`)
-5. Scegli l'aggregazione (es. **mean**, **last**, **max**)
-
-5. Personalizza il grafico (tipo, colori, assi, ecc.)
-6. Salva il dashboard con un nome significativo
+- **InfluxDB 2.x (Flux):**
+```flux
+from(bucket: "arduino_data")
+  |> range(start: -1h)
+  |> filter(fn: (r) => r._measurement == "mqtt_consumer" and r.topic == "arduino/temperature")
+  |> keep(columns: ["_time", "_value"])
+```
 
 ## Parte 5: Configurazione Arduino per MQTT
 
