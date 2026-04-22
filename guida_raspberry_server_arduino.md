@@ -375,6 +375,9 @@ sudo systemctl start grafana-server
 
 # Verifica che sia in esecuzione
 sudo systemctl status grafana-server
+
+# Aprire la porta 3000 nel firewall (se vuoi accedere da altri dispositivi)
+sudo ufw allow 3000/tcp
 ```
 
 ### Accesso all'Interfaccia Grafana
