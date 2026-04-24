@@ -198,6 +198,12 @@ sudo systemctl status influxdb
 
 #### Configurazione iniziale
 
+Prima di aprire il browser, assicurarsi che sia aggiunta l'eccezione per la porta 8086 nel firewall:
+
+```bash
+sudo ufw allow 8086/tcp
+```
+
 1. Apri il browser: `http://<IP_RASPBERRY>:8086`
 2. Segui la procedura guidata per creare:
    - Un utente admin
@@ -328,6 +334,12 @@ Esempio di configurazione:
 
 Sostituisci `token`, `organization` e `bucket` con i valori creati nella configurazione di InfluxDB 2.x.
 
+Se non si ricorda il bucket, è possibile elencarli con:
+
+```bash
+influx bucket list
+```
+
 ### Avvio di Telegraf
 
 ```bash
@@ -388,7 +400,30 @@ sudo ufw allow 3000/tcp
    - **Password**: `admin`
 3. Al primo accesso, ti verrà chiesto di cambiare la password
 
-### Configurazione della Sorgente Dati (Data Source)
+### Configurazione della Sorgente Dati (Data Source, per InfluxDB 2.x)
+
+Inserire nel file di configurazione di Grafana (`/etc/grafana/grafana.ini`) la seguente riga per permettere la connessione ad InfluxDB 2.x e riavviare il servizio:
+
+```ini  
+[feature_toggles]
+enable = newInfluxDSConfigPageDesign
+```
+
+1. Clicca su **Connections** nel menu a sinistra
+2. Clicca **Add new connection**
+3. Scegli **InfluxDB**
+4. Clicca su **Add new data source**
+5. Configura:
+   - **Name**: `InfluxDB Arduino`
+   - **Query Language**: `Flux`
+   - **URL**: `http://localhost:8086`
+   - **Auth**: Seleziona **Basic Auth** solo se hai abilitato autenticazione
+   - **Organization**: l'organizzazione creata in InfluxDB 2.x (es: `vigano`) 
+    - **Bucket**: `arduino_data`
+    - **Token**: il token creato in InfluxDB 2.x
+6. Clicca **Save & test**
+
+### Configurazione della Sorgente Dati (Data Source, per InfluxDB 1.8.x)
 
 1. Clicca su **Connections** nel menu a sinistra
 2. Clicca **Add new connection**
@@ -428,6 +463,14 @@ from(bucket: "arduino_data")
   |> filter(fn: (r) => r._measurement == "mqtt_consumer" and r.topic == "arduino/temperature")
   |> keep(columns: ["_time", "_value"])
 ```
+### Salvataggio nel database di alcuni dati di esempio tramite mosquitto_pub
+
+```bash
+for i in {1..10}; do
+  mosquitto_pub -h localhost -t "arduino/temperature" -m "$((20 + RANDOM % 10))"
+  sleep 5
+done  
+``` 
 
 ## Parte 5: Configurazione Arduino per MQTT
 
