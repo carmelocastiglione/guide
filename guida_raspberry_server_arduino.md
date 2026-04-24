@@ -466,11 +466,17 @@ from(bucket: "arduino_data")
 ### Salvataggio nel database di alcuni dati di esempio tramite mosquitto_pub
 
 ```bash
-for i in {1..10}; do
+#!/bin/bash
+while true; do
   mosquitto_pub -h localhost -t "arduino/temperature" -m "$((20 + RANDOM % 10))"
   sleep 5
 done  
 ``` 
+
+### Cancellare i dati di esempio
+```bash
+influx delete --bucket arduino_data --start '1970-01-01T00:00:00Z' --stop $(date -u +"%Y-%m-%dT%H:%M:%SZ")
+```
 
 ## Parte 5: Configurazione Arduino per MQTT
 
