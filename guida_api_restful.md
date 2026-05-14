@@ -19,6 +19,7 @@ La struttura del progetto è organizzata in modo chiaro per separare i file di c
 api-docker/
 ├── app.js
 ├── package.json
+├── nodemon.json
 ├── Dockerfile
 ├── docker-compose.yml
 ├── database/
@@ -129,6 +130,8 @@ FROM node:18-alpine
 
 WORKDIR /app
 
+ENV NODE_ENV=development
+
 COPY package*.json ./
 
 RUN npm install
@@ -148,6 +151,21 @@ npm-debug.log
 .git
 .gitignore
 .env
+```
+
+### Crea nodemon.json
+
+Questo file configura nodemon per monitorare correttamente i file in Docker:
+
+```json
+{
+  "watch": ["app.js"],
+  "ext": "js",
+  "delay": 1000,
+  "env": {
+    "NODE_ENV": "development"
+  }
+}
 ```
 
 ### Crea docker-compose.yml
@@ -180,6 +198,7 @@ services:
     build: .
     container_name: scuola_api
     environment:
+      NODE_ENV: development
       DB_HOST: db
       DB_USER: root
       DB_PASSWORD: root
