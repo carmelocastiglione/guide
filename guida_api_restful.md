@@ -162,9 +162,11 @@ Questo file configura nodemon per monitorare correttamente i file in Docker:
   "watch": ["app.js"],
   "ext": "js",
   "delay": 1000,
+  "legacyWatch": true,
   "env": {
     "NODE_ENV": "development"
-  }
+  },
+  "verbose": true
 }
 ```
 
@@ -458,6 +460,10 @@ app.post('/api/iscrizioni', async (req, res) => {
 app.get('/health', (req, res) => {
   res.json({ status: 'OK' });
 });
+
+// ============== NUOVE ROUTE - AGGIUNGILE QUI ==============
+// Aggiungi tutte le nuove route PRIMA di questa linea
+// Non aggiungere route dopo app.listen()
 
 // 404 - Rotta non trovata
 app.use((req, res) => {
