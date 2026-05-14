@@ -37,11 +37,15 @@ api-docker/
   "description": "API RESTful con Node.js, Express e MySQL in Docker",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "dev": "nodemon app.js"
   },
   "dependencies": {
     "express": "^4.18.2",
     "mysql2": "^3.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }
 ```
@@ -185,6 +189,7 @@ services:
       - "3000:3000"
     volumes:
       - .:/app
+      - /app/node_modules
     depends_on:
       db:
         condition: service_healthy
