@@ -195,7 +195,7 @@ services:
         condition: service_healthy
     networks:
       - app-network
-    command: npm start
+    command: npm run dev
 
   # Servizio PHPMyAdmin per gestione database
   phpmyadmin:
