@@ -517,47 +517,9 @@ docker volume rm mongodb_data
 docker-compose up -d
 ```
 
----
-
 Risorse Utili
 
 - [Documentazione ufficiale MongoDB](https://docs.mongodb.com/)
 - [Immagine Docker MongoDB](https://hub.docker.com/_/mongo)
 - [MongoDB Shell Reference](https://docs.mongodb.com/mongodb-shell/)
 - [MongoDB for VS Code](https://www.mongodb.com/products/tools/vs-code)
-
----
-
-## Riepilogo Quick Start (Docker Compose - Consigliato)
-
-```powershell
-# 1. Crea il file docker-compose.yml nella cartella del progetto
-#    (Copia il contenuto yaml dalla sezione "Setup Rapido con Docker Compose")
-
-# 2. Avvia MongoDB e Mongo Express
-docker-compose up -d
-
-# 3. Verifica che tutto sia attivo
-docker-compose ps
-
-# 4. Accedi a Mongo Express nel browser (credenziali di Mongo Express, non MongoDB!)
-#    http://localhost:8081
-#    Username: admin
-#    Password: pass
-
-# 5. Accedi a MongoDB da terminale (usa le credenziali MongoDB)
-docker-compose exec mongodb mongosh --username root --password root --authenticationDatabase admin
-
-# 6. Installa l'estensione MongoDB in VSCode e connettiti (credenziali MongoDB)
-#    Stringa: mongodb://root:root@localhost:27017/?authSource=admin
-```
-
-**Ricorda la differenza:**
-- 🌐 **Mongo Express (interfaccia web)** → `admin:pass`
-- 📊 **MongoDB (database)** → `root:root`
-
-**I dati sono automaticamente salvati e persistono anche se arresti i container con `docker-compose down`!**
-
----
-
-Buona fortuna con MongoDB su Docker! 🚀
